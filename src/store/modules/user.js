@@ -62,14 +62,18 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getUserInfo(state.token).then(response => {
-        const  data  = response
+      getUserInfo().then(response => {
+        const  {data}  = response
 
         if (!data) {
           reject('Verification failed, please Login again.')
         }
 
-        const { roles, name } = data
+        let roles = []
+
+        const { role, name } = data
+
+        roles.push(role)
 
         // roles must be a non-empty array
         if (!roles || roles.length <= 0) {
@@ -80,7 +84,7 @@ const actions = {
         commit('SET_NAME', name)
         //commit('SET_AVATAR', avatar)
         //commit('SET_INTRODUCTION', introduction)
-        resolve(data)
+        resolve(roles)
       }).catch(error => {
         reject(error)
       })

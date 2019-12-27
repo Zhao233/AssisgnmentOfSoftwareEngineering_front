@@ -22,9 +22,6 @@ export function getUserInfo(token){
   return request({
     url: '/getUserInfo',
     method: 'post',
-    params: { 
-      "username" : "admin" 
-    }
   })
 }
 
