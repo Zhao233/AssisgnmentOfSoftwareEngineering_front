@@ -11,3 +11,17 @@ export function getTeacherList(search, page, size){
         }
     })
 }
+
+export function updateTeacher(teacher){
+    return request({
+        url: '/admin/updateTeacher',
+        method: 'post',
+        data: {
+            'id': teacher.id,
+            'name': teacher.name,
+            'email': teacher.email,
+            'phone': teacher.phone
+        }
+            
+    })
+}

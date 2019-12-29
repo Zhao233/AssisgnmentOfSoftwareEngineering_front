@@ -8,11 +8,6 @@
         搜索
       </el-button>
 
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit"
-        @click="handleCreate">
-        添加
-      </el-button>
-
       <el-button class="filter-item" style="margin-left: 10px;" type="danger" icon="el-icon-edit" @click="handleDelete">
         删除
       </el-button>
@@ -69,7 +64,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="handleEditDialogClose">取 消</el-button>
-        <el-button type="primary" @click="showEditDialog = false">确 定</el-button>
+        <el-button type="primary" @click="handleEditDialogConfirm" :loading="confirmButtonLoading">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -84,7 +79,7 @@
     translateTime
   } from '@/utils/time'
 
-  import { getTeacherList } from '@/api/teacher'
+  import { getTeacherList, updateTeacher } from '@/api/teacher'
 
   export default {
     components: {
@@ -96,12 +91,15 @@
       return {
         listLoading: true,
 
+        confirmButtonLoading: false,
+
         modifyType: "新增",
         showEditDialog: false,
         formLabelWidth: '60px',
         
 
         editForm: {
+          id: '',
           name: '',
           email: '',
           phone: ''
@@ -199,11 +197,10 @@
       },
 
       // 数据编辑
-      handleCreate() {
-        this.openEditDialog("新增")
-      },
       handleEdit(index, row) {
         this.openEditDialog("修改")
+
+        this.editForm.id = row.id
         this.editForm.name = row.name
         this.editForm.phone = row.phone
         this.editForm.email = row.email
@@ -212,6 +209,26 @@
       },
       handleDelete() {
 
+      },
+      handleEditDialogConfirm() {
+        this.confirmButtonLoading = true
+
+        let teacher = {
+          id: this.editForm.id,
+          name: this.editForm.name,
+          email: this.editForm.email,
+          phone: this.editForm.phone
+        }
+
+        updateTeacher(teacher).then( response => {
+          this.$message('修改成功');
+          
+          this.confirmButtonLoading = false
+
+          this.handleEditDialogClose()
+
+          this.getList()
+        } )
       },
 
       //页面组件回调事件
