@@ -1,8 +1,11 @@
 import request from '@/utils/request'
 
+/**
+ * for teacher management
+ */
 export function getTeacherList(search, page, size){
     return request({
-        url: '/admin/getTeacherList',
+        url: '/admin/teacherManage/getTeacherList',
         method: 'post',
         data: {
             'search': search,
@@ -14,7 +17,7 @@ export function getTeacherList(search, page, size){
 
 export function updateTeacher(teacher){
     return request({
-        url: '/admin/updateTeacher',
+        url: '/admin/teacherManage/updateTeacher',
         method: 'post',
         data: {
             'id': teacher.id,
@@ -28,19 +31,10 @@ export function updateTeacher(teacher){
 
 export function deleteTeacher(id_list){
     return request({
-        url: '/admin/deleteTeachers',
+        url: '/admin/teacherManage/deleteTeachers',
         method: 'post',
         data: {
             'ids': id_list
-        }
-            
-    })
-
-    return request({
-        url: '/admin/deleteTeachers',
-        methos: 'post',
-        data: {
-            'id_list': 'id_list'
-        }
+        }  
     })
 }
