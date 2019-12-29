@@ -64,7 +64,19 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="handleEditDialogClose">取 消</el-button>
-        <el-button type="primary" @click="handleEditDialogConfirm" :loading="confirmButtonLoading">确 定</el-button>
+        <el-button type="primary" @click="handleEditDialogConfirm" :loading="updateConfirmButtonLoading">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title='确认删除？' :visible.sync="showDeleteDialog" width="30%">
+      <template v-for="(item) in multipleSelection">
+        {{item.name}}
+        </p>
+        </template>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="showDeleteDialog = false">取 消</el-button>
+        <el-button type="primary" @click="handleDeleteDialogConfirm" :loading="deleteConfirmButtonLoading">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -79,7 +91,7 @@
     translateTime
   } from '@/utils/time'
 
-  import { getTeacherList, updateTeacher } from '@/api/teacher'
+  import { getTeacherList, updateTeacher, deleteTeacher } from '@/api/teacher'
 
   export default {
     components: {
@@ -91,12 +103,14 @@
       return {
         listLoading: true,
 
-        confirmButtonLoading: false,
+        updateConfirmButtonLoading: false,
+        deleteConfirmButtonLoading: false,
 
         modifyType: "新增",
         showEditDialog: false,
         formLabelWidth: '60px',
         
+        showDeleteDialog: false,
 
         editForm: {
           id: '',
@@ -121,6 +135,10 @@
     },
 
     methods: {
+      openDeleteDialog(){
+        this.showDeleteDialog = true
+      },
+
       openEditDialog(type) {
         this.modifyType = type
         this.showEditDialog = true
@@ -196,6 +214,10 @@
         }
       },
 
+      cleanDeleteInfo(){
+        this.multipleSelection = []
+      },
+
       // 数据编辑
       handleEdit(index, row) {
         this.openEditDialog("修改")
@@ -208,10 +230,37 @@
         console.log(index, row);
       },
       handleDelete() {
-
+        this.multipleSelection.length === 0 ? this.$message("请选中一个教师") : this.openDeleteDialog()
       },
+
+      handleDeleteDialogConfirm(){
+        this.deleteConfirmButtonLoading = true
+
+        let new_selected = []
+        
+        this.multipleSelection.forEach( temp => {
+          new_selected.push(temp.id)
+        })
+
+        deleteTeacher(new_selected).then( response => {
+          let {status, message} = response
+          
+          if(status != 200){
+            this.$message(message)
+          } else {
+            this.$message("删除成功")
+
+            this.deleteConfirmButtonLoading = false
+            this.showDeleteDialog =false 
+            this.cleanDeleteInfo()
+
+            this.getList()
+          }
+        } )
+      },
+
       handleEditDialogConfirm() {
-        this.confirmButtonLoading = true
+        this.updateConfirmButtonLoading = true
 
         let teacher = {
           id: this.editForm.id,
@@ -223,7 +272,7 @@
         updateTeacher(teacher).then( response => {
           this.$message('修改成功');
           
-          this.confirmButtonLoading = false
+          this.updateConfirmButtonLoading = false
 
           this.handleEditDialogClose()
 

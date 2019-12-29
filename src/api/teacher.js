@@ -25,3 +25,22 @@ export function updateTeacher(teacher){
             
     })
 }
+
+export function deleteTeacher(id_list){
+    return request({
+        url: '/admin/deleteTeachers',
+        method: 'post',
+        data: {
+            'ids': id_list
+        }
+            
+    })
+
+    return request({
+        url: '/admin/deleteTeachers',
+        methos: 'post',
+        data: {
+            'id_list': 'id_list'
+        }
+    })
+}
