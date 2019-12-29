@@ -94,6 +94,7 @@ export default {
 .pagination-container {
   background: #fff;
   padding: 32px 16px;
+  margin-top: 0px; 
 }
 .pagination-container.hidden {
   display: none;
