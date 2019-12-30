@@ -68,21 +68,33 @@
     <el-dialog :title="modifyType" :visible.sync="showEditDialog" width="30%" :before-close="handleEditDialogClose">
       <el-form ref="editForm" :model="editForm">
 
-        <el-form-item label="姓名" prop="name">
+        <el-form-item label="类型">
+          <el-select :disabled="isDisableEditSelectClassifyBox()" ref="type" @change="editTypeChange"
+            v-model="editForm.type" class="filter-item">
+            <el-option v-for="item in options" :key="item.type" :label="item.name" :value="item.type" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item v-if="isShowEditSelectClassifyBox" label="所属类别">
+          <el-select ref="fatherIdForItem" v-model="editForm.fatherIdForItem" class="filter-item"
+            :loading="editSelectLoading">
+            <el-option v-for="item in classfiyList" :key="item.id" :label="item.name" :value="item.id" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="名称" prop="name">
           <el-input ref="name" v-model="editForm.name" autocomplete="off"></el-input>
         </el-form-item>
 
-        <el-form-item label="邮箱">
-          <el-input ref="email" v-model="editForm.email" autocomplete="off"></el-input>
+        <el-form-item label="基数">
+          <el-input ref="score" type="number" v-model="editForm.score" autocomplete="off"></el-input>
         </el-form-item>
 
-        <el-form-item label="电话">
-          <el-input ref="phone" v-model="editForm.phone" autocomplete="off"></el-input>
-        </el-form-item>
       </el-form>
+
       <div slot="footer" class="dialog-footer">
         <el-button @click="handleEditDialogClose">取 消</el-button>
-        <el-button type="primary" @click="handleEditDialogConfirm" :loading="updateConfirmButtonLoading">确 定</el-button>
+        <el-button type="primary" @click="handleEditDialogConfirm" :loading="confirmButtonLoading">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -128,10 +140,13 @@
 
     data() {
       return {
-
         selectLoading: true,
+        editSelectLoading: true,
 
         isShowSelectClassifyBox: false,
+        isShowEditSelectClassifyBox: false,
+
+        showEditDialog: false,
 
         options: [{
             type: 0,
@@ -155,11 +170,10 @@
 
         listLoading: true,
 
-        updateConfirmButtonLoading: false,
+        confirmButtonLoading: false,
         deleteConfirmButtonLoading: false,
 
         modifyType: "新增",
-        showEditDialog: false,
         formLabelWidth: '60px',
 
         showDeleteDialog: false,
@@ -167,7 +181,9 @@
         editForm: {
           id: '',
           name: '',
-          email: '',
+          type: '',
+          fatherIdForItem: '',
+          score: '',
           phone: ''
         },
 
@@ -189,6 +205,37 @@
     },
 
     methods: {
+      isDisableEditSelectClassifyBox() {
+        return this.modifyType == "修改"
+      },
+      editTypeChange() {
+        if (this.editForm.type == 1) {
+          this.isShowEditSelectClassifyBox = true
+
+          this.editSelectLoading = true
+
+          getClassifyList().then(response => {
+            let {
+              list
+            } = response
+
+            let options_new = []
+
+            list.forEach(item => {
+              options_new.push({
+                id: item.id,
+                name: item.name
+              })
+            })
+
+            this.classfiyList = options_new
+
+            this.editSelectLoading = false
+          })
+        } else {
+          this.isShowEditSelectClassifyBox = false
+        }
+      },
 
       typeChange() {
         if (this.listQuery.type == 1) {
@@ -220,17 +267,90 @@
         }
       },
 
+      //增加删除修改按钮事件
       handleCreate() {
+        this.openEditDialog("新增")
 
       },
-      openDeleteDialog() {
-        this.showDeleteDialog = true
+      handleEdit(index, row) {
+        this.openEditDialog("修改")
+
+        if (row.type == 1) {
+          this.isShowEditSelectClassifyBox = true
+
+          this.isShowSelectClassifyBox = true
+
+          this.editSelectLoading = true
+
+          getClassifyList().then(response => {
+            let {
+              list
+            } = response
+
+            let options_new = []
+
+            list.forEach(item => {
+              options_new.push({
+                id: item.id,
+                name: item.name
+              })
+            })
+
+            this.classfiyList = options_new
+
+            this.editSelectLoading = false
+          })
+        } else {
+          this.isShowEditSelectClassifyBox = false
+        }
+
+        this.editForm.id = row.id
+        this.editForm.name = row.name
+        this.editForm.type = row.type
+        console.log("dd")
+        this.editForm.score = row.score
+        this.editForm.fatherIdForItem = this.listQuery.fatherIdForItem
+
+        console.log(index, row);
+      },
+      handleDelete() {
+        this.multipleSelection.length === 0 ? this.$message("请选中一个教师") : this.openDeleteDialog()
       },
 
+      //页面组件操作函数
       openEditDialog(type) {
         this.modifyType = type
         this.showEditDialog = true
       },
+
+      openDeleteDialog() {
+        this.showDeleteDialog = true
+      },
+      handleEditDialogConfirm() {
+        this.confirmButtonLoading = true
+
+        let competitionInfo = {
+          id: this.editForm.id,
+          type: this.editForm.type,
+          name: this.editForm.name,
+          fatherIdForItem: this.editForm.fatherIdForItem,
+          score: this.editForm.score
+        }
+
+        let res = response => {
+          this.$message('操作成功');
+
+          this.confirmButtonLoading = false
+
+          this.handleEditDialogClose()
+
+          this.getList()
+        }
+
+        this.modifyType === "新增" ? createCompetitionInfo(competitionInfo).then(res) : updateCompetitionInfo(
+          competitionInfo).then(res)
+      },
+
 
       getTypeName(type) {
         return type === 0 ? "类别" : "项目"
@@ -285,33 +405,22 @@
       },
 
       cleanEditForm() {
-        this.$refs['editForm'].resetFields()
         if (this.editForm.name != '') {
           this.editForm = {
+            id: '',
             name: '',
-            email: '',
+            type: '',
+            fatherIdForItem: '',
+            score: '',
             phone: ''
           }
         }
+
+        this.$refs['editForm'].resetFields()
       },
 
       cleanDeleteInfo() {
         this.multipleSelection = []
-      },
-
-      // 数据编辑
-      handleEdit(index, row) {
-        this.openEditDialog("修改")
-
-        this.editForm.id = row.id
-        this.editForm.name = row.name
-        this.editForm.phone = row.phone
-        this.editForm.email = row.email
-
-        console.log(index, row);
-      },
-      handleDelete() {
-        this.multipleSelection.length === 0 ? this.$message("请选中一个教师") : this.openDeleteDialog()
       },
 
       handleDeleteDialogConfirm() {
@@ -340,27 +449,6 @@
 
             this.getList()
           }
-        })
-      },
-
-      handleEditDialogConfirm() {
-        this.updateConfirmButtonLoading = true
-
-        let teacher = {
-          id: this.editForm.id,
-          name: this.editForm.name,
-          email: this.editForm.email,
-          phone: this.editForm.phone
-        }
-
-        updateTeacher(teacher).then(response => {
-          this.$message('修改成功');
-
-          this.updateConfirmButtonLoading = false
-
-          this.handleEditDialogClose()
-
-          this.getList()
         })
       },
 

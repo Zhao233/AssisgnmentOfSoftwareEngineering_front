@@ -33,7 +33,8 @@ export function createCompetitionInfo(competitionInfo){
         data: {
             'type': competitionInfo.type,
             'name': competitionInfo.name,
-            'score': competitionInfo.score
+            'score': competitionInfo.score,
+            'fatherIdForItem': competitionInfo.fatherIdForItem
         }
     })
 }
@@ -45,6 +46,7 @@ export function updateCompetitionInfo(competitionInfo){
         data: {
             'id': competitionInfo.id,
             'type': competitionInfo.type,
+            'fatherIdForItem': competitionInfo.fatherIdForItem,
             'name': competitionInfo.name,
             'score': competitionInfo.score
         }
