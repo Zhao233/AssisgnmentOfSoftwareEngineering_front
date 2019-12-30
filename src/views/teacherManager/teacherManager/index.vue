@@ -91,7 +91,7 @@
     translateTime
   } from '@/utils/time'
 
-  import { getTeacherList, updateTeacher, deleteTeacher } from '@/api/teacher'
+  import { getTeacherList, updateTeacher, deleteTeacher } from '@/api/teacherManagement/teacherManagement'
 
   export default {
     components: {
