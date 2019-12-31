@@ -432,7 +432,7 @@
           new_selected.push(temp.id)
         })
 
-        deleteTeacher(new_selected).then(response => {
+        deleteCompetitionInfo(new_selected).then(response => {
           let {
             status,
             message
