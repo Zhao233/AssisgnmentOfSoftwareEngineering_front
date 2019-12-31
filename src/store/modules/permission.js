@@ -20,7 +20,7 @@ const actions = {
       if (roles.includes('admin')) {
         accessedRoutes = asyncRoutesForAdmin || []
       } else {
-        if( roles.includes('other') ){
+        if( roles.includes('teacher') ){
           accessedRoutes = asyncRoutesForOther
         }
       }
